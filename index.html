@@ -22,7 +22,7 @@
 <div id="toast"></div><section id="end"><div><div class="eyebrow">END OF DEMO</div><h1>انتهى الجزء الأول...</h1><p style="color:#b9aaa0">لكن ليلى ما زالت تنتظر.</p><button class="start" onclick="location.reload()">إعادة التجربة</button></div></section>
 <script type="module">
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
-const $=id=>document.getElementById(id);let scene,camera,renderer,flash,locked=false,started=false,lamp=true,hasKey=false,doorOpen=false,run=false,yaw=0,pitch=0,move={x:0,y:0},lastX=0,lastY=0;
+const $=id=>document.getElementById(id);let scene,camera,renderer,flash,locked=false,started=false,lamp=true,hasKey=false,doorOpen=false,photoSeen=false,run=false,yaw=0,pitch=0,move={x:0,y:0},lastX=0,lastY=0;
 const colliders=[],interactables=[];const mat=(color,roughness=1)=>new THREE.MeshStandardMaterial({color,roughness});
 function box(w,h,d,x,y,z,m){const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);o.position.set(x,y,z);scene.add(o);return o}
 function setup(){scene=new THREE.Scene();scene.background=new THREE.Color(0x090a0a);scene.fog=new THREE.FogExp2(0x090a0a,.045);camera=new THREE.PerspectiveCamera(72,innerWidth/innerHeight,.08,90);camera.position.set(0,1.65,5.5);renderer=new THREE.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,1.6));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;$('game').appendChild(renderer.domElement);
@@ -37,8 +37,22 @@ box(22,.35,22,0,4.05,0,dark);
 for(let i=-9;i<=9;i+=3){box(.12,3.6,.12,i,1.8,-9.7,plaster)}
 // old house front wall with doorway
 box(6,4,.6,-8,2,-5,plaster);box(6,4,.6,8,2,-5,plaster);box(10,1.1,.6,0,3.45,-5,plaster);
-const door=box(2.4,3,.22,0,1.5,-5.15,wood);door.userData.door=true;interactables.push({mesh:door,type:'door',label:'الباب الخشبي'});
+const door=new THREE.Group();door.position.set(-1.2,0,-5.15);scene.add(door);const doorLeaf=new THREE.Mesh(new THREE.BoxGeometry(2.4,3,.22),wood);doorLeaf.position.set(1.2,1.5,0);door.add(doorLeaf);door.userData.door=true;interactables.push({mesh:door,type:'door',label:'الباب الخشبي'});
 box(2.55,.12,.35,0,3.08,-5.15,metal);
+// بيت من الداخل: غرفة استقبال قديمة وأثاث
+box(9,.18,9,0,-.06,-7.55,mat(0x29231f));
+box(.35,3.8,9,-4.55,1.9,-7.55,plaster);box(.35,3.8,9,4.55,1.9,-7.55,plaster);
+box(9,3.8,.35,0,1.9,-9.95,wall);
+const rug=box(4,.035,3,0,.045,-7.7,mat(0x5a2825));
+box(2.8,.18,1.1,-2.4,.48,-8.5,wood);box(2.8,.55,.16,-2.4,.82,-9.02,wood);
+for(let x of [-3.45,-1.35])for(let z of [-8.85,-7.95])box(.12,.55,.12,x,.25,z,wood);
+box(1.1,1.65,.65,3.35,.82,-9.05,wood);box(1.18,.12,.72,3.35,1.68,-9.05,metal);
+const photo=new THREE.Group();const photoBase=new THREE.Mesh(new THREE.BoxGeometry(.55,.04,.38),metal);photo.add(photoBase);const photoFace=new THREE.Mesh(new THREE.BoxGeometry(.49,.015,.32),mat(0x9b8971));photoFace.position.y=.028;photo.add(photoFace);photo.position.set(2.5,1.82,-8.35);scene.add(photo);interactables.push({mesh:photo,type:'photo',label:'صورة قديمة'});
+box(2.2,.38,3.1,-2.5,.28,-6.35,mat(0x332a28));box(2.25,.18,1.1,-2.5,.55,-7.25,mat(0xaaa092));box(2.3,.3,.18,-2.5,.7,-4.9,wood);
+box(1.3,2.7,.8,3.4,1.35,-6.25,wood);box(1.2,2.5,.04,3.4,1.35,-5.82,mat(0x241b17));
+const ceilingLamp=new THREE.PointLight(0xffb36a,.32,6);ceilingLamp.position.set(0,3.25,-7.5);scene.add(ceilingLamp);
+// ظل غامض يظهر بعد فحص الصورة
+const shadowFigure=new THREE.Group();const shadowMat=new THREE.MeshBasicMaterial({color:0x050405});const torso=new THREE.Mesh(new THREE.CylinderGeometry(.28,.42,1.45,8),shadowMat);torso.position.y=1.0;shadowFigure.add(torso);const head=new THREE.Mesh(new THREE.SphereGeometry(.27,12,10),shadowMat);head.position.y=1.9;shadowFigure.add(head);shadowFigure.position.set(-.1,0,-9.1);shadowFigure.visible=false;scene.add(shadowFigure);
 for(let x of [-7.5,7.5]){box(1.3,1.5,.12,x,2,-4.65,dark);box(1.4,.08,.16,x,1.25,-4.65,wood)}
 // courtyard props: well, barrel, crates, hanging lamp
 const well=new THREE.Mesh(new THREE.CylinderGeometry(1,1.1,.75,12),mat(0x5b5147));well.position.set(-4,.28,-1);scene.add(well);const hole=new THREE.Mesh(new THREE.CylinderGeometry(.72,.72,.05,16),dark);hole.position.set(-4,.68,-1);scene.add(hole);
@@ -58,8 +72,8 @@ function chat(){ $('phone').style.display='grid';}
 $('phoneBtn').onclick=chat;$('closePhone').onclick=()=>$('phone').style.display='none';
 $('choices').onclick=e=>{const b=e.target.closest('button');if(!b)return;const r=b.dataset.reply;say(r,'me');setTimeout(()=>say(r.includes('مفتاح')?'زين... لا تلمس الباب قبل ما تلقاه.':'ما أگدر أشرح هسه. لا تثق بكلشي تشوفه.'),650)};
 $('lampBtn').onclick=()=>{lamp=!lamp;flash.visible=lamp;toast(lamp?'المصباح يعمل':'أطفأت المصباح')};
-function nearest(){let best=null,dist=2.5;for(const it of interactables){if(it.type==='key'&&hasKey)continue;const p=it.mesh.position;const d=Math.hypot(camera.position.x-p.x,camera.position.z-p.z);if(d<dist){dist=d;best=it}}return best}
-function use(){const it=nearest();if(!it){toast('لا يوجد شيء قريب للتفاعل');return}if(it.type==='key'){hasKey=true;scene.remove(key);$('objective').textContent='افتح الباب الخشبي';toast('حصلت على مفتاح قديم');say('لقيت المفتاح؟ أسرع...');return}if(it.type==='door'){if(!hasKey){toast('الباب مقفل... أحتاج مفتاح');return}doorOpen=!doorOpen;door.rotation.y=doorOpen?-Math.PI/2:0;door.position.x=doorOpen?-1.2:0;$('objective').textContent=doorOpen?'ادخل إلى البيت':'افتح الباب';if(doorOpen){toast('انفتح الباب... سمعت صوتاً بالداخل');setTimeout(()=>{say('لااا... قلت لك لا تفتح!');toast('هناك حركة خلف النافذة...')},1800);setTimeout(()=>$('end').style.display='grid',9500)}}}
+function nearest(){let best=null,dist=2.5;for(const it of interactables){if((it.type==='key'&&hasKey)||(it.type==='photo'&&photoSeen))continue;const p=it.mesh.position;const d=Math.hypot(camera.position.x-p.x,camera.position.z-p.z);if(d<dist){dist=d;best=it}}return best}
+function use(){const it=nearest();if(!it){toast('لا يوجد شيء قريب للتفاعل');return}if(it.type==='key'){hasKey=true;scene.remove(key);$('objective').textContent='افتح الباب الخشبي';toast('حصلت على مفتاح قديم');say('لقيت المفتاح؟ أسرع...');return}if(it.type==='photo'){photoSeen=true;toast('الصورة تجمعك بليلى... لكنك لا تعرفها');say('ليلى: لا تقلب الصورة... أرجوك.');$('objective').textContent='ابحث عن مصدر الصوت في الغرفة';setTimeout(()=>{shadowFigure.visible=true;toast('سمعت نفساً خلفك... لا تلتفت');say('ليلى: هو صار وراك. اطلع من البيت!')},2200);return}if(it.type==='door'){if(!hasKey){toast('الباب مقفل... أحتاج مفتاح');return}doorOpen=!doorOpen;door.rotation.y=doorOpen?Math.PI/2:0;$('objective').textContent=doorOpen?'ادخل إلى البيت وابحث عن الصورة':'افتح الباب';if(doorOpen){toast('انفتح الباب... البيت بارد بشكل غريب');say('ليلى: لا تدخل الغرفة الأخيرة. دور على صورة قديمة.')}}}
 $('useBtn').onclick=use;
 function movePlayer(dt){const speed=(run?4.2:2.25)*dt;const forward=new THREE.Vector3(-Math.sin(yaw),0,-Math.cos(yaw));const right=new THREE.Vector3(Math.cos(yaw),0,-Math.sin(yaw));const v=forward.multiplyScalar(move.y).add(right.multiplyScalar(move.x));if(v.length()>1)v.normalize();camera.position.addScaledVector(v,speed);camera.position.x=THREE.MathUtils.clamp(camera.position.x,-10.1,10.1);camera.position.z=THREE.MathUtils.clamp(camera.position.z,-9.2,9.2);camera.position.y=1.65;camera.rotation.set(pitch,yaw,0,'YXZ')}
 const pad=$('pad'),stick=$('stick');let padOn=false;function padMove(e){const r=pad.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;let dx=e.clientX-cx,dy=e.clientY-cy,l=Math.hypot(dx,dy),max=35;if(l>max){dx=dx/l*max;dy=dy/l*max}stick.style.transform=`translate(${dx}px,${dy}px)`;move.x=dx/max;move.y=-dy/max}
@@ -68,6 +82,6 @@ $('runBtn').addEventListener('touchstart',e=>{e.preventDefault();run=true});$('r
 renderer.domElement.addEventListener('pointerdown',e=>{if(!started||innerWidth<700)return;renderer.domElement.requestPointerLock?.()});document.addEventListener('pointerlockchange',()=>locked=document.pointerLockElement===renderer.domElement);document.addEventListener('mousemove',e=>{if(locked){yaw-=e.movementX*.002;pitch=THREE.MathUtils.clamp(pitch-e.movementY*.002,-1.2,1.2)}});
 let touchLook=null;renderer.domElement.addEventListener('touchstart',e=>{if(e.touches.length===1&&e.touches[0].clientX>innerWidth*.42)touchLook={x:e.touches[0].clientX,y:e.touches[0].clientY,id:e.touches[0].identifier}},{passive:true});renderer.domElement.addEventListener('touchmove',e=>{if(!touchLook)return;for(const t of e.touches)if(t.identifier===touchLook.id){yaw-=(t.clientX-touchLook.x)*.004;pitch=THREE.MathUtils.clamp(pitch-(t.clientY-touchLook.y)*.004,-1.2,1.2);touchLook.x=t.clientX;touchLook.y=t.clientY}},{passive:true});renderer.domElement.addEventListener('touchend',()=>touchLook=null);
 $('start').onclick=()=>{$('intro').style.display='none';$('hud').style.display='block';started=true;toast('02:17 AM — وصلت إلى البيت');if(innerWidth>700)renderer.domElement.requestPointerLock?.()};
-setup();let prev=performance.now();function animate(now){requestAnimationFrame(animate);const dt=Math.min((now-prev)/1000,.04);prev=now;if(started){movePlayer(dt);const n=nearest();$('hint').textContent=n?(n.type==='key'?'اضغط ✋ لالتقاط المفتاح':'اضغط ✋ للتفاعل مع الباب'):'استكشف الحوش وابحث عن المفتاح';}renderer.render(scene,camera)}requestAnimationFrame(animate);
+setup();let prev=performance.now();function animate(now){requestAnimationFrame(animate);const dt=Math.min((now-prev)/1000,.04);prev=now;if(started){movePlayer(dt);const n=nearest();$('hint').textContent=n?(n.type==='key'?'اضغط ✋ لالتقاط المفتاح':n.type==='photo'?'اضغط ✋ لفحص الصورة':'اضغط ✋ لفتح الباب'):(hasKey&&!doorOpen?'اقترب من الباب الخشبي':doorOpen&&!photoSeen?'ادخل وابحث عن الصورة':'استكشف الحوش وابحث عن المفتاح');}renderer.render(scene,camera)}requestAnimationFrame(animate);
 addEventListener('resize',()=>{if(!camera)return;camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
 </script></body></html>
