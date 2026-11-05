@@ -20,71 +20,40 @@
 <div id="hud"><div class="topbar"><div><div class="chapter">الفصل الأول · البيت القديم</div><div class="objective" id="objective">استكشف الحوش وابحث عن مدخل للبيت</div></div><div class="actions"><button id="phoneBtn">✉ ليلى</button><button id="lampBtn">🔦 المصباح</button></div></div><div class="crosshair"></div><div id="hint">تحرّك واستكشف المكان</div><div id="mobile"><div class="pad" id="pad"><div class="stick" id="stick"></div></div><div class="mobbtns"><button id="runBtn">🏃</button><button id="useBtn">✋</button></div></div></div>
 <section id="phone"><div class="phonebox"><div class="phonehead"><div class="contact"><div class="avatar"></div><div><b>ليلى</b><div class="status">متصلة الآن... ربما</div></div></div><button class="closephone" id="closePhone">إغلاق ✕</button></div><div class="messages" id="messages"><div class="bubble her">وصلت؟ لا تصدر صوت... البيت يسمع كلشي.</div><div class="bubble her">المفتاح مخبّى قريب من الباب الخشبي. بس انتبه، إذا سمعت أحد يناديك لا تجاوبه.</div></div><div class="choices" id="choices"><button data-reply="أين أنتِ؟">وين إنتِ؟</button><button data-reply="لماذا أنا هنا؟">ليش اخترتيني أني؟</button><button data-reply="سأبحث عن المفتاح">راح أدور على المفتاح.</button></div></div></section>
 <div id="toast"></div><section id="end"><div><div class="eyebrow">END OF DEMO</div><h1>انتهى الجزء الأول...</h1><p style="color:#b9aaa0">لكن ليلى ما زالت تنتظر.</p><button class="start" onclick="location.reload()">إعادة التجربة</button></div></section>
-<script>window.laylaThreeFailed=false;window.laylaStartFallback=function(){if(!window.laylaThreeFailed)return;const intro=document.getElementById('intro'),hud=document.getElementById('hud'),game=document.getElementById('game'),hint=document.getElementById('hint'),objective=document.getElementById('objective');intro.style.display='none';hud.style.display='block';game.innerHTML='<canvas id="fallbackCanvas" style="width:100%;height:100%;display:block"></canvas>';const canvas=document.getElementById('fallbackCanvas'),ctx=canvas.getContext('2d');let hasKey=false,door=false,photo=false;function resize(){canvas.width=innerWidth*devicePixelRatio;canvas.height=innerHeight*devicePixelRatio;ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0)}resize();addEventListener('resize',resize);function draw(){const w=innerWidth,h=innerHeight;let g=ctx.createLinearGradient(0,0,0,h);g.addColorStop(0,'#090b0c');g.addColorStop(.55,'#29221d');g.addColorStop(1,'#080707');ctx.fillStyle=g;ctx.fillRect(0,0,w,h);ctx.fillStyle='#171310';ctx.beginPath();ctx.moveTo(w*.08,h*.8);ctx.lineTo(w*.35,h*.35);ctx.lineTo(w*.65,h*.35);ctx.lineTo(w*.92,h*.8);ctx.fill();ctx.fillStyle='#594737';ctx.fillRect(w*.32,h*.27,w*.36,h*.5);ctx.fillStyle=door?'#100b09':'#291b16';ctx.fillRect(w*.405,h*.35,w*.19,h*.42);ctx.fillStyle='#a58a60';ctx.fillRect(w*.555,h*.56,5,5);if(!hasKey){ctx.fillStyle='#e1bd62';ctx.fillRect(w*.2,h*.74,20,5);ctx.fillStyle='#eee';ctx.font='13px sans-serif';ctx.textAlign='center';ctx.fillText('مفتاح قديم',w*.22,h*.71)}if(photo){ctx.fillStyle='#020202';ctx.beginPath();ctx.ellipse(w*.5,h*.49,18,48,0,0,7);ctx.fill();ctx.beginPath();ctx.arc(w*.5,h*.41,15,0,7);ctx.fill()}ctx.fillStyle='#e8d8c7';ctx.font='14px sans-serif';ctx.textAlign='center';ctx.fillText('البيت القديم',w/2,h*.91);requestAnimationFrame(draw)}draw();window.laylaFallbackUse=function(){if(!hasKey){hasKey=true;objective.textContent='افتح الباب الخشبي';hint.textContent='حصلت على المفتاح';}else if(!door){door=true;objective.textContent='ادخل وابحث عن الصورة';hint.textContent='انفتح الباب';}else if(!photo){photo=true;objective.textContent='هناك ظل خلفك...';hint.textContent='ليلى: لا تلتفت!';}else hint.textContent='ليلى ما زالت هنا...';};document.getElementById('useBtn').onclick=window.laylaFallbackUse;document.getElementById('lampBtn').onclick=()=>hint.textContent='المصباح يومض...';document.getElementById('phoneBtn').onclick=()=>document.getElementById('phone').style.display='grid';document.querySelector('.tiny').textContent='وضع تشغيل بديل يعمل دون محرك 3D';};</script>
-<script type="module">
-let THREE=null;try{THREE=await import('https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js')}catch(firstError){try{THREE=await import('https://unpkg.com/three@0.160.0/build/three.module.js')}catch(secondError){window.laylaThreeFailed=true;}}
-if(THREE){const $=id=>document.getElementById(id);let scene,camera,renderer,flash,door,key,shadowFigure,locked=false,started=false,gameReady=false,lamp=true,hasKey=false,doorOpen=false,photoSeen=false,run=false,yaw=0,pitch=0,move={x:0,y:0},lastX=0,lastY=0;
-const colliders=[],interactables=[];const mat=(color,roughness=1)=>new THREE.MeshStandardMaterial({color,roughness});
-function box(w,h,d,x,y,z,m){const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);o.position.set(x,y,z);scene.add(o);return o}
-function setup(){scene=new THREE.Scene();scene.background=new THREE.Color(0x090a0a);scene.fog=new THREE.FogExp2(0x090a0a,.045);camera=new THREE.PerspectiveCamera(72,innerWidth/innerHeight,.08,90);camera.position.set(0,1.65,5.5);renderer=new THREE.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,1.6));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;$('game').appendChild(renderer.domElement);
-scene.add(new THREE.HemisphereLight(0x87909a,0x211612,.55));const moon=new THREE.DirectionalLight(0x9ca9bd,1.05);moon.position.set(-5,9,4);moon.castShadow=true;scene.add(moon);
-const ground=mat(0x34302a),wall=mat(0x51473c),plaster=mat(0x6a5b4b),wood=mat(0x35251d),dark=mat(0x151312),metal=mat(0x5c5142),tile=mat(0x494238);
-box(22,.3,22,0,-.2,0,ground);
-for(let i=-10;i<=10;i+=2){box(1.96,.015,1.96,i,-.035,0,tile)}
-// enclosed courtyard and house facade
-box(22,4,.5,0,2,-10,wall);box(.5,4,20,-11,2,0,wall);box(.5,4,20,11,2,0,wall);
-box(22,4,.5,0,2,10,wall);
-box(22,.35,22,0,4.05,0,dark);
-for(let i=-9;i<=9;i+=3){box(.12,3.6,.12,i,1.8,-9.7,plaster)}
-// old house front wall with doorway
-box(6,4,.6,-8,2,-5,plaster);box(6,4,.6,8,2,-5,plaster);box(10,1.1,.6,0,3.45,-5,plaster);
-door=new THREE.Group();door.position.set(-1.2,0,-5.15);scene.add(door);const doorLeaf=new THREE.Mesh(new THREE.BoxGeometry(2.4,3,.22),wood);doorLeaf.position.set(1.2,1.5,0);door.add(doorLeaf);door.userData.door=true;interactables.push({mesh:door,type:'door',label:'الباب الخشبي'});
-box(2.55,.12,.35,0,3.08,-5.15,metal);
-// بيت من الداخل: غرفة استقبال قديمة وأثاث
-box(9,.18,9,0,-.06,-7.55,mat(0x29231f));
-box(.35,3.8,9,-4.55,1.9,-7.55,plaster);box(.35,3.8,9,4.55,1.9,-7.55,plaster);
-box(9,3.8,.35,0,1.9,-9.95,wall);
-const rug=box(4,.035,3,0,.045,-7.7,mat(0x5a2825));
-box(2.8,.18,1.1,-2.4,.48,-8.5,wood);box(2.8,.55,.16,-2.4,.82,-9.02,wood);
-for(let x of [-3.45,-1.35])for(let z of [-8.85,-7.95])box(.12,.55,.12,x,.25,z,wood);
-box(1.1,1.65,.65,3.35,.82,-9.05,wood);box(1.18,.12,.72,3.35,1.68,-9.05,metal);
-const photo=new THREE.Group();const photoBase=new THREE.Mesh(new THREE.BoxGeometry(.55,.04,.38),metal);photo.add(photoBase);const photoFace=new THREE.Mesh(new THREE.BoxGeometry(.49,.015,.32),mat(0x9b8971));photoFace.position.y=.028;photo.add(photoFace);photo.position.set(2.5,1.82,-8.35);scene.add(photo);interactables.push({mesh:photo,type:'photo',label:'صورة قديمة'});
-box(2.2,.38,3.1,-2.5,.28,-6.35,mat(0x332a28));box(2.25,.18,1.1,-2.5,.55,-7.25,mat(0xaaa092));box(2.3,.3,.18,-2.5,.7,-4.9,wood);
-box(1.3,2.7,.8,3.4,1.35,-6.25,wood);box(1.2,2.5,.04,3.4,1.35,-5.82,mat(0x241b17));
-const ceilingLamp=new THREE.PointLight(0xffb36a,.32,6);ceilingLamp.position.set(0,3.25,-7.5);scene.add(ceilingLamp);
-// ظل غامض يظهر بعد فحص الصورة
-shadowFigure=new THREE.Group();const shadowMat=new THREE.MeshBasicMaterial({color:0x050405});const torso=new THREE.Mesh(new THREE.CylinderGeometry(.28,.42,1.45,8),shadowMat);torso.position.y=1.0;shadowFigure.add(torso);const head=new THREE.Mesh(new THREE.SphereGeometry(.27,12,10),shadowMat);head.position.y=1.9;shadowFigure.add(head);shadowFigure.position.set(-.1,0,-9.1);shadowFigure.visible=false;scene.add(shadowFigure);
-for(let x of [-7.5,7.5]){box(1.3,1.5,.12,x,2,-4.65,dark);box(1.4,.08,.16,x,1.25,-4.65,wood)}
-// courtyard props: well, barrel, crates, hanging lamp
-const well=new THREE.Mesh(new THREE.CylinderGeometry(1,1.1,.75,12),mat(0x5b5147));well.position.set(-4,.28,-1);scene.add(well);const hole=new THREE.Mesh(new THREE.CylinderGeometry(.72,.72,.05,16),dark);hole.position.set(-4,.68,-1);scene.add(hole);
-for(let i=0;i<3;i++){const c=box(.9,.8,.9,4+i*.85,.4,-1.5,wood);c.rotation.y=.2*i}
-const barrel=new THREE.Mesh(new THREE.CylinderGeometry(.42,.48,1.1,12),mat(0x29231d));barrel.position.set(6,.55,3);scene.add(barrel);
-const lampMesh=new THREE.PointLight(0xffa45a,1.2,7);lampMesh.position.set(0,3.6,1);scene.add(lampMesh);const bulb=new THREE.Mesh(new THREE.SphereGeometry(.09,10,8),mat(0xffc27a));bulb.position.copy(lampMesh.position);scene.add(bulb);
-// key visible near the well
-key=new THREE.Group();const ring=new THREE.Mesh(new THREE.TorusGeometry(.12,.035,8,16),metal);key.add(ring);const shaft=new THREE.Mesh(new THREE.CylinderGeometry(.025,.025,.38,8),metal);shaft.rotation.z=Math.PI/2;shaft.position.x=.2;key.add(shaft);key.position.set(-2.65,.12,-1.8);scene.add(key);interactables.push({mesh:key,type:'key',label:'مفتاح قديم'});
-// debris and grass tufts
-for(let i=0;i<38;i++){let x=(Math.random()-.5)*19,z=(Math.random()-.5)*17;if(Math.abs(x)<1.7&&z<-3)continue;const rock=new THREE.Mesh(new THREE.DodecahedronGeometry(.08+Math.random()*.13,0),mat(0x282521));rock.position.set(x,.02,z);rock.rotation.set(Math.random(),Math.random(),Math.random());scene.add(rock)}
-// flashlight
-flash=new THREE.SpotLight(0xffe5c2,32,19,Math.PI/7,.45,1.3);flash.position.set(0,1.6,0);flash.target.position.set(0,1.4,-1);camera.add(flash);camera.add(flash.target);scene.add(camera);
+<script>
+(function(){
+const $=id=>document.getElementById(id);
+let started=false,hasKey=false,doorOpen=false,photoSeen=false,shadow=false,flashOn=true,playerX=0,playerY=0,look=0;
+const intro=$('intro'),hud=$('hud'),game=$('game'),hint=$('hint'),objective=$('objective'),start=$('start');
+function draw(){
+let canvas=$('laylaCanvas');if(!canvas){canvas=document.createElement('canvas');canvas.id='laylaCanvas';canvas.style.cssText='position:absolute;inset:0;width:100%;height:100%;';game.appendChild(canvas)}
+const ctx=canvas.getContext('2d'),w=innerWidth,h=innerHeight,dpr=Math.min(devicePixelRatio||1,2);
+if(canvas.width!==Math.floor(w*dpr)||canvas.height!==Math.floor(h*dpr)){canvas.width=Math.floor(w*dpr);canvas.height=Math.floor(h*dpr)}
+ctx.setTransform(dpr,0,0,dpr,0,0);
+let bg=ctx.createLinearGradient(0,0,0,h);bg.addColorStop(0,'#080b0d');bg.addColorStop(.55,'#29231e');bg.addColorStop(1,'#070707');ctx.fillStyle=bg;ctx.fillRect(0,0,w,h);
+ctx.fillStyle='#171310';ctx.beginPath();ctx.moveTo(-w*.1,h*.83);ctx.lineTo(w*.28,h*.3);ctx.lineTo(w*.72,h*.3);ctx.lineTo(w*1.1,h*.83);ctx.closePath();ctx.fill();
+ctx.fillStyle='#554638';ctx.fillRect(w*.2,h*.25,w*.6,h*.47);
+ctx.fillStyle='#261a15';ctx.fillRect(w*.39,h*.34,w*.22,h*.38);
+ctx.fillStyle='#806a4e';ctx.fillRect(w*.585,h*.53,5,5);
+ctx.fillStyle='#30251f';ctx.fillRect(w*.08,h*.72,w*.84,h*.06);
+if(!hasKey){ctx.fillStyle='#d9b55d';ctx.fillRect(w*.19,h*.7,25,5);ctx.fillStyle='#e9ddca';ctx.font='12px sans-serif';ctx.textAlign='center';ctx.fillText('مفتاح قديم',w*.22,h*.675)}
+if(photoSeen){ctx.fillStyle='#070607';ctx.beginPath();ctx.ellipse(w*.5,h*.47,19,55,0,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(w*.5,h*.39,16,0,Math.PI*2);ctx.fill();ctx.fillStyle='#b21e2b';ctx.fillRect(w*.492,h*.39,4,3)}
+if(flashOn){const glow=ctx.createRadialGradient(w*.5,h*.53,10,w*.5,h*.53,w*.48);glow.addColorStop(0,'#fff2cf22');glow.addColorStop(1,'#000000bb');ctx.fillStyle=glow;ctx.fillRect(0,0,w,h)}
+ctx.fillStyle='#e7d9c8';ctx.font='13px sans-serif';ctx.textAlign='center';ctx.fillText('البيت القديم • 02:17 AM',w/2,h*.92);
+requestAnimationFrame(draw)
 }
-function toast(t){$('toast').textContent=t;$('toast').classList.add('show');setTimeout(()=>$('toast').classList.remove('show'),2300)}
-function say(text,who='her'){const b=document.createElement('div');b.className='bubble '+who;b.textContent=text;$('messages').appendChild(b);$('messages').scrollTop=9999}
-function chat(){ $('phone').style.display='grid';}
-$('phoneBtn').onclick=chat;$('closePhone').onclick=()=>$('phone').style.display='none';
-$('choices').onclick=e=>{const b=e.target.closest('button');if(!b)return;const r=b.dataset.reply;say(r,'me');setTimeout(()=>say(r.includes('مفتاح')?'زين... لا تلمس الباب قبل ما تلقاه.':'ما أگدر أشرح هسه. لا تثق بكلشي تشوفه.'),650)};
-$('lampBtn').onclick=()=>{lamp=!lamp;flash.visible=lamp;toast(lamp?'المصباح يعمل':'أطفأت المصباح')};
-function nearest(){let best=null,dist=2.5;for(const it of interactables){if((it.type==='key'&&hasKey)||(it.type==='photo'&&photoSeen))continue;const p=it.mesh.position;const d=Math.hypot(camera.position.x-p.x,camera.position.z-p.z);if(d<dist){dist=d;best=it}}return best}
-function use(){const it=nearest();if(!it){toast('لا يوجد شيء قريب للتفاعل');return}if(it.type==='key'){hasKey=true;scene.remove(key);$('objective').textContent='افتح الباب الخشبي';toast('حصلت على مفتاح قديم');say('لقيت المفتاح؟ أسرع...');return}if(it.type==='photo'){photoSeen=true;toast('الصورة تجمعك بليلى... لكنك لا تعرفها');say('ليلى: لا تقلب الصورة... أرجوك.');$('objective').textContent='ابحث عن مصدر الصوت في الغرفة';setTimeout(()=>{shadowFigure.visible=true;toast('سمعت نفساً خلفك... لا تلتفت');say('ليلى: هو صار وراك. اطلع من البيت!')},2200);return}if(it.type==='door'){if(!hasKey){toast('الباب مقفل... أحتاج مفتاح');return}doorOpen=!doorOpen;door.rotation.y=doorOpen?Math.PI/2:0;$('objective').textContent=doorOpen?'ادخل إلى البيت وابحث عن الصورة':'افتح الباب';if(doorOpen){toast('انفتح الباب... البيت بارد بشكل غريب');say('ليلى: لا تدخل الغرفة الأخيرة. دور على صورة قديمة.')}}}
-$('useBtn').onclick=use;
-function movePlayer(dt){const speed=(run?4.2:2.25)*dt;const forward=new THREE.Vector3(-Math.sin(yaw),0,-Math.cos(yaw));const right=new THREE.Vector3(Math.cos(yaw),0,-Math.sin(yaw));const v=forward.multiplyScalar(move.y).add(right.multiplyScalar(move.x));if(v.length()>1)v.normalize();camera.position.addScaledVector(v,speed);camera.position.x=THREE.MathUtils.clamp(camera.position.x,-10.1,10.1);camera.position.z=THREE.MathUtils.clamp(camera.position.z,-9.2,9.2);camera.position.y=1.65;camera.rotation.set(pitch,yaw,0,'YXZ')}
-const pad=$('pad'),stick=$('stick');let padOn=false;function padMove(e){const r=pad.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;let dx=e.clientX-cx,dy=e.clientY-cy,l=Math.hypot(dx,dy),max=35;if(l>max){dx=dx/l*max;dy=dy/l*max}stick.style.transform=`translate(${dx}px,${dy}px)`;move.x=dx/max;move.y=-dy/max}
-pad.addEventListener('pointerdown',e=>{padOn=true;pad.setPointerCapture(e.pointerId);padMove(e)});pad.addEventListener('pointermove',e=>{if(padOn)padMove(e)});for(const ev of ['pointerup','pointercancel'])pad.addEventListener(ev,()=>{padOn=false;move={x:0,y:0};stick.style.transform='translate(0,0)'});
-$('runBtn').addEventListener('touchstart',e=>{e.preventDefault();run=true});$('runBtn').addEventListener('touchend',()=>run=false);
-renderer.domElement.addEventListener('pointerdown',e=>{if(!started||innerWidth<700)return;renderer.domElement.requestPointerLock?.()});document.addEventListener('pointerlockchange',()=>locked=document.pointerLockElement===renderer.domElement);document.addEventListener('mousemove',e=>{if(locked){yaw-=e.movementX*.002;pitch=THREE.MathUtils.clamp(pitch-e.movementY*.002,-1.2,1.2)}});
-let touchLook=null;renderer.domElement.addEventListener('touchstart',e=>{if(e.touches.length===1&&e.touches[0].clientX>innerWidth*.42)touchLook={x:e.touches[0].clientX,y:e.touches[0].clientY,id:e.touches[0].identifier}},{passive:true});renderer.domElement.addEventListener('touchmove',e=>{if(!touchLook)return;for(const t of e.touches)if(t.identifier===touchLook.id){yaw-=(t.clientX-touchLook.x)*.004;pitch=THREE.MathUtils.clamp(pitch-(t.clientY-touchLook.y)*.004,-1.2,1.2);touchLook.x=t.clientX;touchLook.y=t.clientY}},{passive:true});renderer.domElement.addEventListener('touchend',()=>touchLook=null);
-window.laylaStartFallback=()=>{if(!gameReady){const t=document.querySelector('.tiny');if(t)t.textContent='اللعبة لم تجهز بعد. حدّث الصفحة وتأكد من الإنترنت.';return}$('intro').style.display='none';$('hud').style.display='block';started=true;toast('02:17 AM — وصلت إلى البيت');if(innerWidth>700)renderer.domElement.requestPointerLock?.()};$('start').onclick=window.laylaStartFallback;
-try{setup();gameReady=true;$('start').disabled=false}catch(error){console.error('LAYLA setup error:',error);const tiny=document.querySelector('.tiny');if(tiny)tiny.textContent='حدث خطأ أثناء تشغيل اللعبة. حدّث الصفحة وحاول مجدداً.';$('start').textContent='إعادة المحاولة';}
-let prev=performance.now();function animate(now){requestAnimationFrame(animate);const dt=Math.min((now-prev)/1000,.04);prev=now;if(started){movePlayer(dt);const n=nearest();$('hint').textContent=n?(n.type==='key'?'اضغط ✋ لالتقاط المفتاح':n.type==='photo'?'اضغط ✋ لفحص الصورة':'اضغط ✋ لفتح الباب'):(hasKey&&!doorOpen?'اقترب من الباب الخشبي':doorOpen&&!photoSeen?'ادخل وابحث عن الصورة':'استكشف الحوش وابحث عن المفتاح');}renderer.render(scene,camera)}requestAnimationFrame(animate);
-addEventListener('resize',()=>{if(!camera)return;camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
-}else{window.laylaThreeFailed=true;document.querySelector('.tiny').textContent='محرك 3D غير متاح؛ اضغط لبدء وضع التشغيل البديل.';}
+function startGame(){started=true;intro.style.display='none';hud.style.display='block';game.style.display='block';hint.textContent='تحرّك في الحوش وابحث عن المفتاح';objective.textContent='ابحث عن المفتاح قرب البئر';draw()}
+window.laylaStartFallback=startGame;start.onclick=startGame;
+$('useBtn').onclick=function(){if(!started)return;if(!hasKey){hasKey=true;objective.textContent='افتح الباب الخشبي';hint.textContent='التقطت المفتاح القديم';}else if(!doorOpen){doorOpen=true;objective.textContent='ادخل إلى البيت وابحث عن الصورة';hint.textContent='الباب انفتح بصوت صرير...';}else if(!photoSeen){photoSeen=true;shadow=true;objective.textContent='هناك شيء خلفك...';hint.textContent='ليلى تهمس: لا تلتفت!';}else{hint.textContent='ليلى: تأخرت كثيراً...';}}
+$('lampBtn').onclick=function(){flashOn=!flashOn;hint.textContent=flashOn?'أشعلت المصباح':'أطفأت المصباح';}
+$('phoneBtn').onclick=function(){$('phone').style.display='grid';}
+$('closePhone').onclick=function(){$('phone').style.display='none';}
+$('choices').onclick=function(e){const b=e.target.closest('button');if(!b)return;const m=document.createElement('div');m.className='bubble me';m.textContent=b.dataset.reply;$('messages').appendChild(m);setTimeout(()=>{const a=document.createElement('div');a.className='bubble her';a.textContent='ليلى: لا تثق بالبيت... أنا أحاول أساعدك.';$('messages').appendChild(a)},500)}
+let pad=$('pad'),stick=$('stick'),active=false;
+function padMove(e){const r=pad.getBoundingClientRect(),dx=e.clientX-r.left-r.width/2,dy=e.clientY-r.top-r.height/2,lim=34,len=Math.hypot(dx,dy)||1,x=dx/len*Math.min(len,lim),y=dy/len*Math.min(len,lim);stick.style.transform='translate('+x+'px,'+y+'px)';playerX+=x/lim;playerY+=y/lim;if(started)hint.textContent='تتحرك داخل الحوش...'}
+pad.addEventListener('pointerdown',e=>{active=true;pad.setPointerCapture(e.pointerId);padMove(e)});
+pad.addEventListener('pointermove',e=>{if(active)padMove(e)});
+['pointerup','pointercancel'].forEach(ev=>pad.addEventListener(ev,()=>{active=false;stick.style.transform='translate(0,0)'}));
+addEventListener('resize',()=>{if(started){const old=$('laylaCanvas');if(old)old.remove();draw()}});
+})();
 </script></body></html>
