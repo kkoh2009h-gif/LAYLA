@@ -22,7 +22,7 @@
 <div id="toast"></div><section id="end"><div><div class="eyebrow">END OF DEMO</div><h1>انتهى الجزء الأول...</h1><p style="color:#b9aaa0">لكن ليلى ما زالت تنتظر.</p><button class="start" onclick="location.reload()">إعادة التجربة</button></div></section>
 <script type="module">
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
-const $=id=>document.getElementById(id);let scene,camera,renderer,locked=false,started=false,lamp=true,hasKey=false,doorOpen=false,run=false,yaw=0,pitch=0,move={x:0,y:0},lastX=0,lastY=0;
+const $=id=>document.getElementById(id);let scene,camera,renderer,flash,locked=false,started=false,lamp=true,hasKey=false,doorOpen=false,run=false,yaw=0,pitch=0,move={x:0,y:0},lastX=0,lastY=0;
 const colliders=[],interactables=[];const mat=(color,roughness=1)=>new THREE.MeshStandardMaterial({color,roughness});
 function box(w,h,d,x,y,z,m){const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);o.position.set(x,y,z);scene.add(o);return o}
 function setup(){scene=new THREE.Scene();scene.background=new THREE.Color(0x090a0a);scene.fog=new THREE.FogExp2(0x090a0a,.045);camera=new THREE.PerspectiveCamera(72,innerWidth/innerHeight,.08,90);camera.position.set(0,1.65,5.5);renderer=new THREE.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,1.6));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.outputColorSpace=THREE.SRGBColorSpace;$('game').appendChild(renderer.domElement);
@@ -50,7 +50,7 @@ const key=new THREE.Group();const ring=new THREE.Mesh(new THREE.TorusGeometry(.1
 // debris and grass tufts
 for(let i=0;i<38;i++){let x=(Math.random()-.5)*19,z=(Math.random()-.5)*17;if(Math.abs(x)<1.7&&z<-3)continue;const rock=new THREE.Mesh(new THREE.DodecahedronGeometry(.08+Math.random()*.13,0),mat(0x282521));rock.position.set(x,.02,z);rock.rotation.set(Math.random(),Math.random(),Math.random());scene.add(rock)}
 // flashlight
-const flash=new THREE.SpotLight(0xffe5c2,32,19,Math.PI/7,.45,1.3);flash.position.set(0,1.6,0);flash.target.position.set(0,1.4,-1);camera.add(flash);camera.add(flash.target);scene.add(camera);
+flash=new THREE.SpotLight(0xffe5c2,32,19,Math.PI/7,.45,1.3);flash.position.set(0,1.6,0);flash.target.position.set(0,1.4,-1);camera.add(flash);camera.add(flash.target);scene.add(camera);
 }
 function toast(t){$('toast').textContent=t;$('toast').classList.add('show');setTimeout(()=>$('toast').classList.remove('show'),2300)}
 function say(text,who='her'){const b=document.createElement('div');b.className='bubble '+who;b.textContent=text;$('messages').appendChild(b);$('messages').scrollTop=9999}
